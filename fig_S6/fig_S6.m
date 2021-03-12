@@ -1,4 +1,4 @@
-%% Fig 07 - Chi^2 heuristic 
+%% Fig S6 - Chi^2 heuristic 
 % Add paths
 addpath('../lib');
 
@@ -37,4 +37,4 @@ for i = 1:length(R)
     end
 end
 
-save('../res/res_07','out','rmse','N_Chi2');
+save('../res/res_S6','out','rmse','N_Chi2');

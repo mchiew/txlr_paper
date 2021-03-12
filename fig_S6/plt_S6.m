@@ -1,8 +1,8 @@
-%% Plot Fig 07
+%% Plot Fig S6
 
 figure('Position',[0 0 800 800], 'PaperUnits', 'inches', 'PaperSize', 6.92*[1,1]);
 
-load('../res/res_07');
+load('../res/res_S6');
 ids = 'abcd';
 for i = 1:4
     subplot(4,1,i)
@@ -26,6 +26,6 @@ set(findobj(gcf,'Type','axes'),'FontSize',16);
 set(findobj(gcf,'Type','Line'),'LineWidth',2);
 set(findobj(gcf,'Type','axes'),'TickLabelInterpreter','latex');
 
-saveas(gcf,'fig_07');
-saveas(gcf,'fig_07.svg');
-saveas(gcf,'fig_07','epsc');
+saveas(gcf,'fig_S6');
+saveas(gcf,'fig_S6.svg');
+saveas(gcf,'fig_S6','epsc');
