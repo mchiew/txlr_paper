@@ -46,7 +46,7 @@ text(-1.5,1,ids(1),'Interpreter','latex', 'FontSize', 32);
 
 % Load data
 q       =   matfile('../data/brain_data');
-data    =   permute(reshape(double(crop_k(q.kdata(:,:,7:26,:,:),[24,24])),24,24,20,32,8),[1,2,4,5,3]);
+data    =   permute(reshape(double(q.kdata(:,:,7:26,:,:)),48,48,20,32,8),[1,2,4,5,3]);
 
 
 i = 7;
@@ -56,24 +56,32 @@ kernel      =   [5,5];
 imsize      =   [64,64];
 thresh      =   50;
 
-% Compute and mask Tx-sensitivities
+% Compute masks
 for z = 1:20
-    mask        =   sum(sum(abs(ifft2(padarray(data(:,:,:,:,z),0.5*[imsize(1)-size(data,1),imsize(2)-size(data,2),0,0]))).^2,3),4).^0.5;
-    mask        =   fftshift(mask > 0.05*max(mask(:)));
-    sens_ref(:,:,:,z)   =   tx_espirit(data(:,:,:,:,z), imsize, kernel, thresh).*mask;
-    sens_txlr(:,:,:,z)  =   tx_espirit(out_txlr(:,:,:,:,z,i), imsize, kernel, thresh).*mask;
-    sens_primo(:,:,:,z) =   tx_espirit(out_primo(:,:,:,:,z,i), imsize, kernel, thresh).*mask;
-    sens_vc(:,:,:,z)    =   tx_espirit(out_vc(:,:,:,:,z,i), imsize, kernel, thresh).*mask;
+    mask(:,:,z)         =   sum(sum(abs(ifft2(padarray(data(:,:,:,:,z),0.5*[imsize(1)-size(data,1),imsize(2)-size(data,2),0,0]))).^2,3),4).^0.5;
+    mask(:,:,z)         =   fftshift(mask(:,:,z) > 0.1*max(reshape(mask(:,:,z),[],1)));
+end
+
+% Crop data down to 24x24 matrix 
+data    =   reshape(crop_k(data, [24,24]),[24,24,32,8,20]);
+
+% Compute Tx-sensitivities
+for z = 1:20
+    
+    sens_ref(:,:,:,z)   =   tx_espirit(data(:,:,:,:,z), imsize, kernel, thresh).*mask(:,:,z);
+    sens_txlr(:,:,:,z)  =   tx_espirit(out_txlr(:,:,:,:,z,i), imsize, kernel, thresh).*mask(:,:,z);
+    sens_primo(:,:,:,z) =   tx_espirit(out_primo(:,:,:,:,z,i), imsize, kernel, thresh).*mask(:,:,z);
+    sens_vc(:,:,:,z)    =   tx_espirit(out_vc(:,:,:,:,z,i), imsize, kernel, thresh).*mask(:,:,z);
     
     % Phase align for RMSE comparison (since absolute phase is irrelevant)
     sens_txlr(:,:,:,z)  =   phs_align(sens_ref(:,:,:,z), sens_txlr(:,:,:,z));
     sens_primo(:,:,:,z) =   phs_align(sens_ref(:,:,:,z), sens_primo(:,:,:,z));
     sens_vc(:,:,:,z)    =   phs_align(sens_ref(:,:,:,z), sens_vc(:,:,:,z));
 end
-
+%%
 % Plot options
 c = 8;
-z = 12;
+z = 16;
 lbls        =   {'Truth','VC','PRIMO','TxLR';'','','',''};
 
 
@@ -122,7 +130,7 @@ saveas(gcf,'fig_09','epsc');
 %% Helper function
 function plt_mag(pos, img, label)
     subplot('Position',pos);
-    imagesc(abs(img),[0 1]);colormap(gca,parula);
+    imagesc(flip(abs(img),1),[0 1]);colormap(gca,parula);
     axis square; axis off
     title(label,'Interpreter','latex')
     xticklabels '';
@@ -132,7 +140,7 @@ end
 
 function plt_phs(pos, img, label)
     subplot('Position',pos);
-    imagesc(img,[-pi,pi]);colormap(gca,hsv);
+    imagesc(flip(img,1),[-pi,pi]);colormap(gca,hsv);
     axis square; axis off
     title(label,'Interpreter','latex')
     xticklabels '';
