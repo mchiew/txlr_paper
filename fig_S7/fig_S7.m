@@ -1,4 +1,4 @@
-%% Fig S6 - Variable density sampling 
+%% Fig S7 - Variable density sampling 
 
 % Add paths
 addpath('../lib');
@@ -26,4 +26,4 @@ opts.truth  =   d0;
 % Perform under-sampled recovery and compute RMSE
 [~, rmse_txlr] = admm_txlr(dS, kernel, 50, [r, r], opts);
 
-save('../res/res_S6','rmse_*');
+save('../res/res_S7','rmse_*');

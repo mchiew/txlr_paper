@@ -1,7 +1,7 @@
-%% Plot Fig S6
+%% Plot Fig S7
 figure('Position',[0 0 800 800], 'PaperUnits', 'inches', 'PaperSize', 6.92*[1,1]);
 load('../res/res_S1');
-load('../res/res_S6');
+load('../res/res_S7');
 
 cla();hold on;
 plot(rmse_H1H2(1:50,50),'linewidth',2);
@@ -18,6 +18,6 @@ c=colorbar();
 c.Visible = false;
 
 
-saveas(gcf,'fig_S6');
-saveas(gcf,'fig_S6.svg');
-saveas(gcf,'fig_S6','epsc');
+saveas(gcf,'fig_S7');
+saveas(gcf,'fig_S7.svg');
+saveas(gcf,'fig_S7','epsc');
