@@ -1,84 +1,140 @@
-%% Plot Fig 9
+%% Plot Fig 09
 
 % Load data
 load('../res/res_09');
 
-figure('Position',[0 0 800 800], 'PaperUnits', 'inches', 'PaperSize', 6.92*[1,1]);
-ids = 'ab';
-
-%% Plot Fig 9
 % Add paths
 addpath('../lib');
 
+% Create figure
+figure('Position',[0 0 800 400], 'PaperUnits', 'inches', 'PaperSize', 6.92*[1,0.5]);
+ids = 'abc';
+
+%% Plot Fig 09a
+subplot('Position',[0.05 0.1 0.45 .9]); hold on;
+ax = gca;
+set(ax,'FontSize',16);
+R = [1,3,5,7];
+
+for i = 1:4
+    ax.ColorOrderIndex = 1;
+    scatter(sum(abs(rmse_vc(:,R(i))-rmse_vc(:,R(i))')<0.005,2).*randn(20,1)/250 + (i-1)*3+1 + (i-1),rmse_vc(:,R(i)),100,'filled')
+    scatter(sum(abs(rmse_primo(:,R(i))-rmse_primo(:,R(i))')<0.005,2).*randn(20,1)/250 + (i-1)*3+2 + (i-1),rmse_primo(:,R(i)),100,'filled')
+    scatter(sum(abs(rmse_txlr(:,R(i))-rmse_txlr(:,R(i))')<0.005,2).*randn(20,1)/250 + (i-1)*3+3 + (i-1),rmse_txlr(:,R(i)),100,'filled')
+end
+alpha(0.5);
+
+boxplot([rmse_vc(:,1) rmse_primo(:,1) rmse_txlr(:,1) rmse_vc(:,3) rmse_primo(:,3) rmse_txlr(:,3) rmse_vc(:,5) rmse_primo(:,5) rmse_txlr(:,5) rmse_vc(:,7) rmse_primo(:,7) rmse_txlr(:,7)],'positions',[1:3 5:7 9:11 13:15]);
+set(findobj(gca,'Type','Line'),'Linewidth',1);
+set(findobj(gca,'Type','Line'),'Color',[0.2 0.2 0.2 0.75])
+set(findobj(gca,'Tag','Outliers'),'Marker','None');
+
+axis square;
+grid on;
+xlim([0.5 15.5]);
+ylim([0 1]);
+yticks(0:0.1:1);
+xticks([1:3 5:7 9:11 13:15])
+
+set(gca,'TickLabelInterpreter','latex');
+xticklabels({'','R=2','','','R=4','','','R=6','','','R=8',''})
+ylabel('RMSE','Interpreter','latex');
+legend({'VC','PRIMO','TxLR'},'Interpreter','latex','Location','NorthWest');
+text(-1.5,1,ids(1),'Interpreter','latex', 'FontSize', 32);
+
+%% Plot Fig 09b
+
 % Load data
+q       =   matfile('../data/brain_data');
+data    =   permute(reshape(double(crop_k(q.kdata(:,:,7:26,:,:),[24,24])),24,24,20,32,8),[1,2,4,5,3]);
 
-q       =   matfile('../data/body_data');
-data    =   zeros(24,24,8,8,6);
-data(:,:,:,:,1) =   double(crop_k(q.kdata1,[24,24],true));
-data(:,:,:,:,2) =   double(crop_k(q.kdata2,[24,24],true));
-data(:,:,:,:,3) =   double(crop_k(q.kdata3(1:72,:,:,:),[24,24],true));
-data(:,:,:,:,4) =   double(crop_k(q.kdata4(1:72,:,:,:),[24,24],true));
-data(:,:,:,:,5) =   double(crop_k(q.kdata5(1:72,:,:,:),[24,24],true));
-data(:,:,:,:,6) =   double(crop_k(q.kdata6(1:72,:,:,:),[24,24],true));
 
-% Subject, dataset and coil to plot
-subj        =   4;
-c           =   3;
-rank        =   50;
+i = 7;
 
 % ESPIRiT Parameters
 kernel      =   [5,5];
 imsize      =   [64,64];
-thresh      =   rank;
+thresh      =   50;
 
+% Compute and mask Tx-sensitivities
+for z = 1:20
+    mask        =   sum(sum(abs(ifft2(padarray(data(:,:,:,:,z),0.5*[imsize(1)-size(data,1),imsize(2)-size(data,2),0,0]))).^2,3),4).^0.5;
+    mask        =   fftshift(mask > 0.05*max(mask(:)));
+    sens_ref(:,:,:,z)   =   tx_espirit(data(:,:,:,:,z), imsize, kernel, thresh).*mask;
+    sens_txlr(:,:,:,z)  =   tx_espirit(out_txlr(:,:,:,:,z,i), imsize, kernel, thresh).*mask;
+    sens_primo(:,:,:,z) =   tx_espirit(out_primo(:,:,:,:,z,i), imsize, kernel, thresh).*mask;
+    sens_vc(:,:,:,z)    =   tx_espirit(out_vc(:,:,:,:,z,i), imsize, kernel, thresh).*mask;
+    
+    % Phase align for RMSE comparison (since absolute phase is irrelevant)
+    sens_txlr(:,:,:,z)  =   phs_align(sens_ref(:,:,:,z), sens_txlr(:,:,:,z));
+    sens_primo(:,:,:,z) =   phs_align(sens_ref(:,:,:,z), sens_primo(:,:,:,z));
+    sens_vc(:,:,:,z)    =   phs_align(sens_ref(:,:,:,z), sens_vc(:,:,:,z));
+end
+
+% Plot options
+c = 8;
+z = 12;
 lbls        =   {'Truth','VC','PRIMO','TxLR';'','','',''};
 
-R           =   [4,8];
-for i = 1:2
-    % Compute and mask Tx-sensitivities
-    mask        =   sum(sum(abs(ifft2(padarray(data(:,:,:,:,subj),0.5*[imsize(1)-size(data,1),imsize(2)-size(data,2),0,0]))).^2,3),4).^0.5;
-    mask        =   fftshift(mask > 0.05*max(mask(:)));
-    sens_ref    =   tx_espirit(data(:,:,:,:,subj), imsize, kernel, thresh).*mask;
-    sens_H1H2   =   tx_espirit(out_H1H2(:,:,:,:,subj,R(i)-1,rank/5), imsize, kernel, thresh).*mask;
-    sens_H2     =   tx_espirit(out_H2(:,:,:,:,subj,R(i)-1,rank/5), imsize, kernel, thresh).*mask;
-    sens_H0     =   tx_espirit(out_H0(:,:,:,:,subj,R(i)-1,rank/5), imsize, kernel, thresh).*mask;
 
-    % Phase align for RMSE comparison (since absolute phase is irrelevant)
-    sens_H1H2   =   phs_align(sens_ref, sens_H1H2);
-    sens_H2     =   phs_align(sens_ref, sens_H2);
-    sens_H0     =   phs_align(sens_ref, sens_H0);
+% Plot magnitude sensitivities
+plt_mag([0.5500 0.725 0.1 0.2], sens_ref(:,:,c,z),   lbls{1,1});
+ylabel('Mag','Interpreter','latex','Visible','on');
+text(-13.33,-6.66,ids(2),'Interpreter','latex', 'FontSize', 32);
+plt_mag([0.6625 0.725 0.1 0.2], sens_vc(:,:,c,z),    lbls{1,2});
+plt_mag([0.7750 0.725 0.1 0.2], sens_primo(:,:,c,z),    lbls{1,3});
+plt_mag([0.8875 0.725 0.1 0.2], sens_txlr(:,:,c,z),  lbls{1,4});
 
-    % Plot magnitude sensitivities
-    plt_fn([0.0500 0.735-0.5*(i-1) 0.2 0.2], abs(sens_ref(:,:,c)),   lbls{i,1});
-    ylabel(sprintf('R=%d',R(i)),'Interpreter','latex','Visible','on');
-    text(-13.33,-6.66,ids(i),'Interpreter','latex', 'FontSize', 24);
-    plt_fn([0.2750 0.735-0.5*(i-1) 0.2 0.2], abs(sens_H0(:,:,c)),    lbls{i,2});
-    plt_fn([0.5000 0.735-0.5*(i-1) 0.2 0.2], abs(sens_H2(:,:,c)),    lbls{i,3});
-    plt_fn([0.7250 0.735-0.5*(i-1) 0.2 0.2], abs(sens_H1H2(:,:,c)),  lbls{i,4});
+cbar = colorbar();
+cbar.Position = [0.585 0.5 0.025 0.2];
 
-    cbar = colorbar();
-    cbar.Position = [0.935 1.01-i*0.5 0.025 0.2];
-    
-    % Plot absolute differences
-    plt_fn([0.2750 0.51-0.5*(i-1) 0.2 0.2], sens_ref(:,:,c)-sens_H0(:,:,c),     '');
-    text(43,60,sprintf('%3.3f', rmse(sens_H0(:,:,c),sens_ref(:,:,c))),'Color',0.99*[1,1,1],'FontSize', 20,'Interpreter','latex');
-    ylabel(sprintf('diff'),'Interpreter','latex','Visible','on');
-    plt_fn([0.5000 0.51-0.5*(i-1) 0.2 0.2], sens_ref(:,:,c)-sens_H2(:,:,c),     '');
-    text(43,60,sprintf('%3.3f', rmse(sens_H2(:,:,c),sens_ref(:,:,c))),'Color',0.99*[1,1,1],'FontSize', 20,'Interpreter','latex');
-    plt_fn([0.7250 0.51-0.5*(i-1) 0.2 0.2], sens_ref(:,:,c)-sens_H1H2(:,:,c),   '');
-    text(43,60,sprintf('%3.3f', rmse(sens_H1H2(:,:,c),sens_ref(:,:,c))),'Color',0.99*[1,1,1],'FontSize', 20,'Interpreter','latex');
-end
+% Plot absolute differences
+plt_mag([0.6625 0.5 0.1 0.2], abs(sens_ref(:,:,c,z))-abs(sens_vc(:,:,c,z)),     '');
+text(34,58,sprintf('%3.3f', rmse(sens_vc(:,:,c,z),sens_ref(:,:,c,z))),'Color',0.99*[1,1,1],'FontSize', 16,'Interpreter','latex');
+ylabel('diff','Interpreter','latex','Visible','on');
+plt_mag([0.7750 0.5 0.1 0.2], abs(sens_ref(:,:,c,z))-abs(sens_primo(:,:,c,z)),     '');
+text(34,58,sprintf('%3.3f', rmse(sens_primo(:,:,c,z),sens_ref(:,:,c,z))),'Color',0.99*[1,1,1],'FontSize', 16,'Interpreter','latex');
+plt_mag([0.8875 0.5 0.1 0.2], abs(sens_ref(:,:,c,z))-abs(sens_txlr(:,:,c,z)),   '');
+text(34,58,sprintf('%3.3f', rmse(sens_txlr(:,:,c,z),sens_ref(:,:,c,z))),'Color',0.99*[1,1,1],'FontSize', 16,'Interpreter','latex');
+
+% Plot phase sensitivities
+plt_phs([0.5500 0.225 0.1 0.2], angle(sens_ref(:,:,c,z)),   lbls{2,1});
+ylabel('Phs','Interpreter','latex','Visible','on');
+text(-13.33,-6.66,ids(3),'Interpreter','latex', 'FontSize', 32);
+plt_phs([0.6625 0.225 0.1 0.2], angle(sens_vc(:,:,c,z)),    lbls{2,2});
+plt_phs([0.7750 0.225 0.1 0.2], angle(sens_primo(:,:,c,z)),    lbls{2,3});
+plt_phs([0.8875 0.225 0.1 0.2], angle(sens_txlr(:,:,c,z)),  lbls{2,4});
+
+cbar = colorbar();
+cbar.Position = [0.585 0.0 0.025 0.2];
+
+% Plot phase differences
+plt_phs([0.6625 0.0 0.1 0.2], angle(sens_ref(:,:,c,z))-angle(sens_vc(:,:,c,z)),     '');
+ylabel('diff','Interpreter','latex','Visible','on');
+plt_phs([0.7750 0.0 0.1 0.2], angle(sens_ref(:,:,c,z))-angle(sens_primo(:,:,c,z)),     '');
+plt_phs([0.8875 0.0 0.1 0.2], angle(sens_ref(:,:,c,z))-angle(sens_txlr(:,:,c,z)),   '');
+
 
 saveas(gcf,'fig_09');
 saveas(gcf,'fig_09.svg');
 saveas(gcf,'fig_09','epsc');
 
 %% Helper function
-function plt_fn(pos, img, label)
-    axes('Position', pos);
-    imagesc(abs(rot90(img)), [0,1]);
+function plt_mag(pos, img, label)
+    subplot('Position',pos);
+    imagesc(abs(img),[0 1]);colormap(gca,parula);
     axis square; axis off
-    title(label,'Interpreter','latex');
+    title(label,'Interpreter','latex')
+    xticklabels '';
+    yticklabels '';
+    set(gca,'FontSize',16);
+end
+
+function plt_phs(pos, img, label)
+    subplot('Position',pos);
+    imagesc(img,[-pi,pi]);colormap(gca,hsv);
+    axis square; axis off
+    title(label,'Interpreter','latex')
     xticklabels '';
     yticklabels '';
     set(gca,'FontSize',16);

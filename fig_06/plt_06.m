@@ -8,7 +8,7 @@ load('../res/res_06');
 subplot('Position',[0.05 0.1 0.45 .9]); hold on;
 set(gca,'FontSize',16);
 
-scatter(sum(abs(rmse_H1-rmse_H1')<0.01,2).*randn(48,1)/250 + 1,rmse_H1,100,'filled')
+scatter(sum(abs(rmse_H1-rmse_H1')<0.01,2).*randn(48,1)/250 + 1,rmse_H1,100,'filled','MarkerFaceColor',[0.5,0,0.5]);
 scatter(sum(abs(rmse_H2-rmse_H2')<0.01,2).*randn(48,1)/250 + 2,rmse_H2,100,'filled')
 scatter(sum(abs(rmse_H1H2-rmse_H1H2')<0.01,2).*randn(48,1)/250 + 3,rmse_H1H2,100,'filled')
 alpha(0.5);
@@ -24,7 +24,7 @@ xlim([0.5 3.5]);
 ylim([0 0.4]);
 
 set(gca,'TickLabelInterpreter','latex');
-xticklabels({'$\mathcal{T_C}$ only','$\mathcal{R_C}$ only','$\mathcal{T_C}+\mathcal{R_C}$'});
+xticklabels({'\parbox{5em}{$\mathcal{T_C}$ only\\ }','\parbox{5em}{$\mathcal{R_C}$ only\\(PRIMO)}','\parbox{5em}{$\mathcal{T_C}+\mathcal{R_C}$\\(TxLR)}'});
 ylabel('RMSE','Interpreter','latex');
 yticks(0:0.05:0.4);
 
