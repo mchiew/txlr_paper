@@ -1,6 +1,6 @@
-% Plot Fig S5
+% Plot Fig S3
 
-load('../res/res_S5','rmse*');
+load('../res/res_S3','rmse*');
 
 figure('Position',[0 0 400 400], 'PaperUnits', 'inches', 'PaperSize', 6.92*[0.5,0.5]);
 clf();hold on;
@@ -36,6 +36,6 @@ xticklabels({'',' R=2','','','',' R=4','','','',' R=6','','','',' R=8','','',''}
 ylabel('RMSE','Interpreter','latex');
 legend({'matrix size = 18$\times$18','matrix size = 24$\times$24','matrix size = 36$\times$36','matrix size = 48$\times$48'},'Interpreter','latex', 'NumColumns',2, 'FontSize',10)
 
-saveas(gcf,'fig_S5');
-saveas(gcf,'fig_S5.svg');
-saveas(gcf,'fig_S5','epsc');
+saveas(gcf,'fig_S3');
+saveas(gcf,'fig_S3.svg');
+saveas(gcf,'fig_S3','epsc');

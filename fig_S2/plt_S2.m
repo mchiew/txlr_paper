@@ -1,6 +1,6 @@
-%% Plot Fig S1
+%% Plot Fig S2
 figure('Position',[0 0 800 800], 'PaperUnits', 'inches', 'PaperSize', 6.92*[1,1]);
-load('../res/res_S1');
+load('../res/res_S2');
 
 subplot(2,2,3);
 pltfn(rmse_H1H2,'TxLR', '(c)');

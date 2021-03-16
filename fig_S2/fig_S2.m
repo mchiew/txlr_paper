@@ -1,4 +1,4 @@
-%% Fig S1 - Checking optimal rank thresholds, iterations for TxLR, PRIMO and VC
+%% Fig S2 - Checking optimal rank thresholds, iterations for TxLR, PRIMO and VC
 
 % Add paths
 addpath('../lib');
@@ -42,4 +42,4 @@ for i = r
     rmse_H0(:,i) = err;
 end
 
-save('res_S1','rmse_*');
+save('res_S2','rmse_*');

@@ -1,4 +1,4 @@
-%% Fig S5 - RMSE vs k-FOV at R=8, PSNR = for syn data all slices
+%% Fig S3 - RMSE vs k-FOV at R=8, PSNR = for syn data all slices
 
 % Add paths
 addpath('../lib');
@@ -71,7 +71,7 @@ for z = 1:size(data24,5)
     end
 end
 
-save('../res/res_S5','out_24','out_36','out_48','rmse_24','rmse_36','rmse_48');
+save('../res/res_S3','out_24','out_36','out_48','rmse_24','rmse_36','rmse_48');
 
 %% Helper function
 function c = rmse(a,b)
