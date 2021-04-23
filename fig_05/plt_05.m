@@ -80,7 +80,6 @@ function plt_fn2(idx, data1, data2, xlbl, ylbl, xtik, leg)
     ylim([0 0.5]);
     
     legend(leg,'location','northwest','Interpreter','latex', 'FontSize', 10);
-    legend('boxoff');
     set(ax,'TickLabelInterpreter','latex');    
     set(ax,'FontSize',16);
     grid on;

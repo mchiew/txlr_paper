@@ -48,9 +48,7 @@ function plt_fn(idx, data, id)
     set(gca,'TickLabelInterpreter','latex');
     
     if idx == 1
-        %legend(h([1 4 7]),'PSNR = 70 dB ($\sigma=3.2\times 10^{-4}$)','PSNR = 60 dB ($\sigma=1.0\times 10^{-3}$)','PSNR = 50 dB ($\sigma=3.2\times 10^{-3}$)','Interpreter','latex')
-        legend(h([1 4 7]),'VC','PRIMO','TxLR','Interpreter','latex');
-        legend('boxoff');
+        legend(h([1 4 7]),'VC','PRIMO','TxLR','Interpreter','latex');        
     end   
     
     text(1,1.05,id,'Interpreter','latex', 'FontSize', 24);
